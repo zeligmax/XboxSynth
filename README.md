@@ -3,7 +3,7 @@
 **XboxSynth** is a real-time synthesizer controlled with an **Xbox One controller**.  
 It combines [Pyo](https://ajaxsoundstudio.com/software/pyo/), [PyGame](https://www.pygame.org/news), and [PyQt6](https://riverbankcomputing.com/software/pyqt/intro) to generate sounds, effects, and recordings while interacting with the gamepad.
 
-For the last Release go to [RELEASE]([https://github.com/zeligmax/XboxSynth/blob/main/LICENSE.md)
+For the last Release go to [RELEASE](https://github.com/zeligmax/XboxSynth/tree/main/RELEASE)
 ---
 
 ## 🎯 Features
