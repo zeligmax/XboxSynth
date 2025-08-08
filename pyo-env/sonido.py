@@ -1,4 +1,4 @@
-# sonido.py
+# sonido.py modificado con pitch bend y sensibilidad ajustada
 from pyo import Server, SawTable, SquareTable, HarmTable, Osc, Freeverb, Delay, Chorus, Phaser, Mix
 
 # --- SINTETIZADOR CLÁSICO (botones)
@@ -54,17 +54,23 @@ class Sintetizador:
         self.octave = max(-3, min(3, self.octave + change))
         return self.octave
 
-    def set_reverb_mix(self, value):  # value entre 0 y 1
+    def set_reverb_mix(self, value):
         self.reverb.bal = value
 
-    def set_phaser_freq(self, value):  # joystick derecho eje X
+    def set_phaser_freq(self, value):
         self.phaser.freq = 0.1 + 5 * value
 
-    def set_chorus_depth(self, value):  # joystick derecho eje Y
+    def set_chorus_depth(self, value):
         self.chorus.depth = 0.1 + 1.9 * value
 
     def clear_note_offset(self):
         self.note_offset = None
+
+    def pitch_bend(self, bend_amount):
+        if self.note_offset is not None:
+            base_freq = self.base_freq * (2 ** self.octave) * (2 ** (self.note_offset / 12))
+            semitone_ratio = 2 ** (bend_amount / 12)
+            self.osc.freq = base_freq * semitone_ratio
 
 
 # --- SINTETIZADOR DUAL (joysticks)
@@ -114,6 +120,8 @@ class SintetizadorHibrido:
         self.left_joystick_enabled = True
         self.right_joystick_enabled = True
 
+        self.salida = Mix([self.sint.final_mix, self.dual.mix], voices=2)  # 🔊 Grabación lista
+        
     def set_freq(self, note_offset):
         self.sint.set_freq(note_offset)
 
@@ -146,16 +154,14 @@ class SintetizadorHibrido:
 
     def set_left_joystick(self, x, y):
         if self.left_joystick_enabled:
-            self.dual.osc_left.freq = self.dual.base_freq * (2 ** self.dual.octave) + (x + 1) * 110
-            self.dual.osc_left.mul = (1 - y) / 2
+            self.dual.set_left_joystick(x, y)
         else:
             self.dual.osc_left.freq = 0
             self.dual.osc_left.mul = 0
 
     def set_right_joystick(self, x, y):
         if self.right_joystick_enabled:
-            self.dual.osc_right.freq = self.dual.base_freq * (2 ** self.dual.octave) + (x + 1) * 220
-            self.dual.osc_right.mul = (1 - y) / 2
+            self.dual.set_right_joystick(x, y)
         else:
             self.dual.osc_right.freq = 0
             self.dual.osc_right.mul = 0
@@ -173,3 +179,8 @@ class SintetizadorHibrido:
             self.dual.osc_right.freq = 0
             self.dual.osc_right.mul = 0
         return self.right_joystick_enabled
+
+    def pitch_bend(self, bend):
+        self.sint.pitch_bend(bend)
+
+    
